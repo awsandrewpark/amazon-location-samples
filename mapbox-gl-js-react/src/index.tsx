@@ -19,7 +19,7 @@ import amplifyConfig from "./aws-exports";
 Amplify.configure(amplifyConfig);
 
 // Replace with the name of the map that you created on the Amazon Location Service console: https://console.aws.amazon.com/location/maps/home?region=us-east-1#/
-const mapName = "<MAP_NAME>";
+const mapName = "explore.map";
 
 /**
  * Sign requests made by Mapbox GL using AWS SigV4.
@@ -54,9 +54,11 @@ const App = () => {
   );
 
   const [viewport, setViewport] = React.useState<Partial<ViewportProps>>({
-    longitude: -123.1187,
-    latitude: 49.2819,
-    zoom: 10,
+    // longitude: -123.1187,
+    // latitude: 49.2819,
+    longitude: -79.39,
+    latitude: 43.6416,
+    zoom: 18,
   });
 
   React.useEffect(() => {
@@ -72,8 +74,10 @@ const App = () => {
       {credentials ? (
         <ReactMapGL
           {...viewport}
-          width="100%"
-          height="100vh"
+          // width="100%"
+          // height="100vh"
+          width="70%"
+          height="70vh"
           transformRequest={transformRequest(credentials)}
           mapStyle={mapName}
           onViewportChange={setViewport}

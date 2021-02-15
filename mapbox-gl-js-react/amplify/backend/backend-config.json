@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "mapboxgljsreactfb6c42d9": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}
