@@ -12,6 +12,7 @@ import ReactMapGL, {
   ViewportProps,
 } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import AddressLookup from './AddressLookup';
 
 import "./index.css";
 import amplifyConfig from "./aws-exports";
@@ -48,17 +49,58 @@ const transformRequest = (credentials: ICredentials) => (
   return { url: url || "" };
 };
 
+// const transformPlaceIndexRequest = (credentials: ICredentials) => (
+//     url?: string,
+//     resourceType?: string
+// ): SearchRequest => {
+//   // Resolve to an AWS URL
+//   if (resourceType === "Style" && !url?.includes("://")) {
+//     url = `https://places.geo.${amplifyConfig.aws_project_region}.amazonaws.com/places/v0/indexes/${url}/search/position`;
+//   }
+//
+//   // Only sign AWS requests (with the signature as part of the query string)
+//   if (url?.includes("amazonaws.com")) {
+//     return {
+//       url: Signer.signUrl(url, {
+//         access_key: credentials.accessKeyId,
+//         secret_key: credentials.secretAccessKey,
+//         session_token: credentials.sessionToken,
+//       }),
+//     };
+//   }
+//
+//   // Don't sign
+//   return { url: url || "" };
+// };
+
+
 const App = () => {
+  let defaultLatitude=-79.39;
+  let defaultLongitude=43.6416;
+
   const [credentials, setCredentials] = React.useState<ICredentials | null>(
     null
   );
 
+  window.navigator.geolocation.getCurrentPosition(
+      position => {
+        defaultLatitude=position.coords.latitude;
+        defaultLongitude=position.coords.longitude;
+      },
+      err => {
+        console.log("the error is ", err)
+      }
+  );
+
+  console.log(defaultLatitude)
+  console.log(defaultLongitude)
   const [viewport, setViewport] = React.useState<Partial<ViewportProps>>({
-    // longitude: -123.1187,
-    // latitude: 49.2819,
-    longitude: -79.39,
-    latitude: 43.6416,
-    zoom: 18,
+    // For some reason, below returns blank screen
+    latitude: Number(defaultLatitude),
+    longitude: Number(defaultLongitude),
+    // latitude: 43.3227021,
+    // longitude: -79.8366918,
+    zoom: 20
   });
 
   React.useEffect(() => {
@@ -71,26 +113,30 @@ const App = () => {
 
   return (
     <div>
-      {credentials ? (
-        <ReactMapGL
-          {...viewport}
-          // width="100%"
-          // height="100vh"
-          width="70%"
-          height="70vh"
-          transformRequest={transformRequest(credentials)}
-          mapStyle={mapName}
-          onViewportChange={setViewport}
-        >
-          <div style={{ position: "absolute", left: 20, top: 20 }}>
-            {/* react-map-gl v5 doesn't support dragging the compass to change bearing */}
-            <NavigationControl showCompass={false} />
-          </div>
-        </ReactMapGL>
-      ) : (
-        <h1>Loading...</h1>
-      )}
+      <div className="address">
+        <AddressLookup credentials={credentials}/>
+      </div>
     </div>
+//      {credentials ? (
+//         <ReactMapGL
+//           {...viewport}
+//           // width="100%"
+//           // height="100vh"
+//           width="70%"
+//           height="70vh"
+//           transformRequest={transformRequest(credentials)}
+//           mapStyle={mapName}
+//           onViewportChange={setViewport}
+//         >
+//           <div style={{ position: "absolute", left: 20, top: 20 }}>
+//             {/* react-map-gl v5 doesn't support dragging the compass to change bearing */}
+//             <NavigationControl showCompass={false} />
+//           </div>
+//         </ReactMapGL>
+//       ) : (
+//         <h1>Loading...</h1>
+//       )}
+
   );
 };
 
