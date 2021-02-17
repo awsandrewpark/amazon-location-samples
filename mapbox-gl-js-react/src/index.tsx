@@ -75,33 +75,27 @@ const transformRequest = (credentials: ICredentials) => (
 
 
 const App = () => {
-  let defaultLatitude=-79.39;
-  let defaultLongitude=43.6416;
-
   const [credentials, setCredentials] = React.useState<ICredentials | null>(
     null
   );
 
-  window.navigator.geolocation.getCurrentPosition(
-      position => {
-        defaultLatitude=position.coords.latitude;
-        defaultLongitude=position.coords.longitude;
-      },
-      err => {
-        console.log("the error is ", err)
-      }
-  );
-
-  console.log(defaultLatitude)
-  console.log(defaultLongitude)
   const [viewport, setViewport] = React.useState<Partial<ViewportProps>>({
     // For some reason, below returns blank screen
-    latitude: Number(defaultLatitude),
-    longitude: Number(defaultLongitude),
-    // latitude: 43.3227021,
-    // longitude: -79.8366918,
-    zoom: 20
+    latitude: 43.322662353515625,
+    longitude: -79.8364486694336,
+    zoom: 15
   });
+  React.useEffect(() => {
+    /* window navigator logic*/
+    window.navigator.geolocation.getCurrentPosition(
+        position => {
+          setViewport({...viewport, latitude: position.coords.latitude, longitude: position.coords.longitude});
+        },
+        err => {
+          console.log("the error is ", err)
+        }
+    );
+  }, [])
 
   React.useEffect(() => {
     const fetchCredentials = async () => {
@@ -112,31 +106,35 @@ const App = () => {
   }, []);
 
   return (
+
     <div>
       <div className="address">
-        <AddressLookup credentials={credentials}/>
+        <AddressLookup credentials={credentials} setViewport={setViewport} viewport={viewport}/>
       </div>
-    </div>
-//      {credentials ? (
-//         <ReactMapGL
-//           {...viewport}
-//           // width="100%"
-//           // height="100vh"
-//           width="70%"
-//           height="70vh"
-//           transformRequest={transformRequest(credentials)}
-//           mapStyle={mapName}
-//           onViewportChange={setViewport}
-//         >
-//           <div style={{ position: "absolute", left: 20, top: 20 }}>
-//             {/* react-map-gl v5 doesn't support dragging the compass to change bearing */}
-//             <NavigationControl showCompass={false} />
-//           </div>
-//         </ReactMapGL>
-//       ) : (
-//         <h1>Loading...</h1>
-//       )}
 
+    <div>
+      {credentials ? (
+         <ReactMapGL
+           {...viewport}
+           // width="100%"
+           // height="100vh"
+           width="70%"
+           height="70vh"
+           transformRequest={transformRequest(credentials)}
+           mapStyle={mapName}
+           onViewportChange={setViewport}
+         >
+           <div style={{ position: "absolute", left: 20, top: 20 }}>
+             {/* react-map-gl v5 doesn't support dragging the compass to change bearing */}
+             <NavigationControl showCompass={false} />
+           </div>
+         </ReactMapGL>
+       ) : (
+         <h1>Loading...</h1>
+       )}
+    </div>
+
+    </div>
   );
 };
 

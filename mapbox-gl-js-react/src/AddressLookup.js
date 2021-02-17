@@ -1,15 +1,26 @@
 import React, { Component } from 'react';
 import { Signer, ICredentials } from "@aws-amplify/core";
 
+import Amplify, { Auth } from 'aws-amplify';
+import Location from "aws-sdk/clients/location";
+import awsconfig from './aws-exports';
+
+Amplify.configure(awsconfig);
+
 class AddressLookup extends Component {
     state = { lat: '', long: '', address: '', isHidden: true };
-    toggleHidden = () => this.setState((prevState)=>({isHidden: !prevState.isHidden}))
+    toggleHidden = () => this.setState((prevState)=>({isHidden: !prevState.isHidden}));
 
     updateLatitude = event => {
-        this.setState({ lat: event.target.value });
+        //this.props.setViewport({ ...viewPort, latitude: event.target.value });
+        this.props.setViewport(previousViewport => {return {...previousViewport, latitude: Number(event.target.value)}})
     }
     updateLongitude = event => {
-        this.setState({ long: event.target.value });
+        this.props.setViewport(previousViewport => {return {...previousViewport, longitude: Number(event.target.value)}})
+    }
+    updateAddress = rsp => {
+        const label = rsp.Results[0].Place.Label;
+        this.setState({ address: label });
     }
 
     handleKeyPress = event => {
@@ -20,21 +31,25 @@ class AddressLookup extends Component {
         }
     }
 
-    searchAddress = credentials => () => {
+    searchAddress = credentials => async () => {
+        // this.setState((prevState)=>({isHidden: !prevState.isHidden}));
         this.toggleHidden();
-        const indexName="explore.place";
-        var url = `https://places.geo.us-east-1.amazonaws.com/places/v0/indexes/${indexName}/search/position=${this.state.long}&position=${this.state.lat}`;
-        url=Signer.signUrl({url}, {
-                access_key: credentials.accessKeyId,
-                secret_key: credentials.secretAccessKey,
-                session_token: credentials.sessionToken,
-            });
-        fetch(`${url}`)
-            .then(response => response.json())
-            .then(json => this.setState({ address: json.Results }))
-            .catch(error => alert(error.message));
 
-        //this.props.searchAddress(this.state.addressQuery);
+        const indexName="explore.place";
+        const client = new Location({
+            credentials,
+            region: awsconfig.aws_project_region,
+        });
+
+        const rsp = await client.searchPlaceIndexForPosition({
+            IndexName: indexName,
+            Position: [
+                Number(this.props.viewport.longitude),
+                Number(this.props.viewport.latitude)
+            ]
+        }).promise();
+        console.log(rsp);
+        this.updateAddress(rsp);
     }
 
     render () {
@@ -59,8 +74,8 @@ class AddressLookup extends Component {
                     />
                 </p>
                 <button onClick={this.searchAddress(credentials)}>Look Up</button>
-                {!this.state.isHidden && <p>Lat,Long: {this.state.lat},{this.state.long}</p>}
-                {!this.state.isHidden && <p>Address: {this.state.address}</p>}
+                {!this.state.isHidden && <p>Lat,Long: {this.props.viewport.latitude},{this.props.viewport.longitude}</p>}
+                {!this.state.isHidden && <p>Addresss: {this.state.address}</p>}
             </div>
         );
     }
