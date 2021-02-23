@@ -80,9 +80,8 @@ const App = () => {
   );
 
   const [viewport, setViewport] = React.useState<Partial<ViewportProps>>({
-    // For some reason, below returns blank screen
-    latitude: 43.322662353515625,
-    longitude: -79.8364486694336,
+    latitude: 43.6416,
+    longitude: -79.39,
     zoom: 15
   });
   React.useEffect(() => {
@@ -118,7 +117,7 @@ const App = () => {
            {...viewport}
            // width="100%"
            // height="100vh"
-           width="70%"
+           width="90%"
            height="70vh"
            transformRequest={transformRequest(credentials)}
            mapStyle={mapName}

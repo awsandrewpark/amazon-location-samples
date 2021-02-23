@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Signer, ICredentials } from "@aws-amplify/core";
-
-import Amplify, { Auth } from 'aws-amplify';
+import Amplify from 'aws-amplify';
 import Location from "aws-sdk/clients/location";
 import awsconfig from './aws-exports';
 
@@ -50,6 +48,10 @@ class AddressLookup extends Component {
         }).promise();
         console.log(rsp);
         this.updateAddress(rsp);
+
+        fetch(`https://fazn9f2k1f.execute-api.us-east-1.amazonaws.com/dev`)
+            .then(response => console.log(response.json()))
+            .then(data => console.log(data));
     }
 
     render () {
@@ -74,8 +76,8 @@ class AddressLookup extends Component {
                     />
                 </p>
                 <button onClick={this.searchAddress(credentials)}>Look Up</button>
-                {!this.state.isHidden && <p>Lat,Long: {this.props.viewport.latitude},{this.props.viewport.longitude}</p>}
-                {!this.state.isHidden && <p>Addresss: {this.state.address}</p>}
+                {<p>Lat,Long: {this.props.viewport.latitude},{this.props.viewport.longitude}</p>}
+                {!this.state.isHidden && <p>Address: {this.state.address}</p>}
             </div>
         );
     }
